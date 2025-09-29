@@ -9,6 +9,21 @@ Features
 - Resilient reconnect with exponential backoff
 - Minimal dependencies: requests, simpleaudio
 
+Local-only Mode (no Vercel required)
+- Run a tiny local HTTP server and trigger sounds via HTTP.
+- Endpoints:
+  - POST /tone  JSON: {"frequency_hz":440, "duration_ms":300, "volume":0.5, "blocking":false}
+  - POST /wav   JSON: {"url":"https://example.com/notify.wav", "blocking":false}
+  - GET  /health
+```
+python -m src.local_server  # starts http://127.0.0.1:8765
+# Example triggers
+curl -X POST http://127.0.0.1:8765/tone -H 'Content-Type: application/json' \
+  -d '{"frequency_hz":660,"duration_ms":200,"volume":0.6}'
+curl -X POST http://127.0.0.1:8765/wav -H 'Content-Type: application/json' \
+  -d '{"url":"https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav"}'
+```
+
 SSE Event Format
 Send JSON objects in the SSE `data:` field. Supported actions:
 
@@ -48,6 +63,11 @@ export AGENT_AUTH_TOKEN="YOUR_TOKEN_IF_ANY"
 4. Run
 ```
 python -m src.main
+```
+
+Run in Local-only Mode
+```
+python -m src.local_server
 ```
 
 Packaging a Windows .exe (PyInstaller)
