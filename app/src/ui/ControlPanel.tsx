@@ -30,6 +30,7 @@ export const ControlPanel: React.FC<Props> = ({ engine, settings, onChangeSettin
       <Knob label="Bass Q" min={0.1} max={2} step={0.01} value={settings.bassQ} onChange={(v)=>onChangeSettings({ bassQ: v })} />
       <Knob label="Echo Time" min={0} max={1.5} step={0.01} value={settings.echoTime} onChange={(v)=>onChangeSettings({ echoTime: v })} />
       <Knob label="Echo Feedback" min={0} max={0.95} step={0.01} value={settings.echoFeedback} onChange={(v)=>onChangeSettings({ echoFeedback: v })} />
+      <Knob label="Echo Mix" min={0} max={1} step={0.01} value={settings.echoMix} onChange={(v)=>onChangeSettings({ echoMix: v })} />
       <Knob label="Reverb Mix" min={0} max={1} step={0.01} value={settings.reverbMix} onChange={(v)=>onChangeSettings({ reverbMix: v })} />
     </div>
   );

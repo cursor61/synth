@@ -15,17 +15,34 @@ function createWindow() {
   })
   const url = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
   mainWindow.loadURL(url)
+  // Hide to tray instead of quitting when closed
+  mainWindow.on('close', (e) => {
+    if (app.isQuiting) return
+    e.preventDefault()
+    mainWindow.hide()
+  })
 }
 
 app.whenReady().then(() => {
   createWindow()
-  tray = new Tray(process.platform === 'win32' ? path.join(__dirname, 'app', 'public', 'vite.svg') : undefined)
+  // Determine an icon path if available; fall back gracefully
+  let iconPath
+  const candidate = path.join(__dirname, 'app', 'public', 'vite.svg')
+  try {
+    iconPath = candidate
+  } catch {}
+  try {
+    tray = new Tray(iconPath)
+  } catch {
+    tray = new Tray(undefined)
+  }
   tray.setToolTip('Synth input listener')
   const contextMenu = Menu.buildFromTemplate([
     { label: 'Show', click: () => { if (mainWindow) mainWindow.show() } },
-    { label: 'Quit', click: () => { app.quit() } }
+    { label: 'Quit', click: () => { app.isQuiting = true; app.quit() } }
   ])
   tray.setContextMenu(contextMenu)
+  tray.on('double-click', () => { if (mainWindow) mainWindow.show() })
 })
 
 app.on('window-all-closed', () => {

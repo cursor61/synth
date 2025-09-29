@@ -38,6 +38,7 @@ export class AudioEngine {
   private filter: BiquadFilterNode;
   private delay: DelayNode;
   private delayGain: GainNode;
+  private delayWetGain: GainNode;
   private reverb: ConvolverNode;
   private reverbGain: GainNode;
   private compressor: DynamicsCompressorNode;
@@ -69,6 +70,7 @@ export class AudioEngine {
     this.filter = this.context.createBiquadFilter();
     this.delay = this.context.createDelay(2.0);
     this.delayGain = this.context.createGain();
+    this.delayWetGain = this.context.createGain();
     this.reverb = this.context.createConvolver();
     this.reverbGain = this.context.createGain();
     this.compressor = this.context.createDynamicsCompressor();
@@ -78,12 +80,14 @@ export class AudioEngine {
     this.filter.connect(this.delay);
     this.delay.connect(this.delayGain);
     this.delayGain.connect(this.filter); // feedback loop via filter
+    this.delay.connect(this.delayWetGain); // wet delay path
     this.filter.connect(this.reverb);
+    this.reverb.connect(this.reverbGain); // wet reverb path
 
     const post = this.context.createGain();
     this.filter.connect(post); // dry path
-    this.delay.connect(post); // wet echo path (via delayGain loop already)
-    this.reverb.connect(post); // wet reverb path
+    this.delayWetGain.connect(post); // wet echo path
+    this.reverbGain.connect(post); // wet reverb path
 
     post.connect(this.compressor);
     this.compressor.connect(this.masterGain);
@@ -129,7 +133,8 @@ export class AudioEngine {
     this.filter.Q.value = this.settings.bassQ;
     this.delay.delayTime.value = this.settings.echoTime;
     this.delayGain.gain.value = this.settings.echoFeedback;
-    this.reverbGain.gain.value = this.settings.reverbMix; // not used directly but retained for future
+    this.delayWetGain.gain.value = this.settings.echoMix;
+    this.reverbGain.gain.value = this.settings.reverbMix;
   }
 
   setInstrument(type: InstrumentType): void {
@@ -215,8 +220,8 @@ export class AudioEngine {
     this.recorder.start();
   }
 
-  stopRecording(): Blob | null {
-    if (!this.recorder) return null;
+  stopRecording(): Promise<Blob | null> {
+    if (!this.recorder) return Promise.resolve(null);
     return new Promise<Blob | null>((resolve) => {
       if (!this.recorder) return resolve(null);
       this.recorder.onstop = () => {
@@ -224,7 +229,7 @@ export class AudioEngine {
         resolve(blob);
       };
       this.recorder.stop();
-    }) as unknown as Blob | null;
+    });
   }
 }
 
