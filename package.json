@@ -1,0 +1,16 @@
+{
+  "name": "synth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm --prefix app run dev",
+    "electron:dev": "concurrently \"npm:start-electron\" \"npm --prefix app run dev\"",
+    "start-electron": "wait-on tcp:5173 && electron .",
+    "build": "npm --prefix app run build",
+    "postinstall": "npm --prefix app install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
